@@ -4,7 +4,7 @@ import networkx as nx
 from manim import *
 
 
-class SampleGraph(Scene):
+class RandomWalkOnGraph(Scene):
     def construct(self):
         random.seed(0)
         init_node = 0
@@ -48,10 +48,10 @@ class SampleGraph(Scene):
         self.play(star.animate.shift(relative_shift))
         self.wait(1)
 
+        # Generate random walk starting from init node
         cur_node = init_node
         for _ in range(walk_length):
-            next_node = random.choice(list(nxg[cur_node]))
-            cur_node = next_node
+            cur_node = random.choice(list(nxg[cur_node]))
 
             relative_shift = g[cur_node].get_center() - star.get_center()
             self.play(star.animate.shift(relative_shift), run_time=0.5)
