@@ -1,9 +1,16 @@
-from manim import *
+import random
+
 import networkx as nx
+from manim import *
 
 
 class SampleGraph(Scene):
     def construct(self):
+        random.seed(0)
+        init_node = 0
+        walk_length = 50
+        init_pos = 2 * RIGHT  # initial current position of the star
+
         # Create graph
         nodes = list(range(10))
         edges = [
@@ -18,10 +25,12 @@ class SampleGraph(Scene):
             (7, 8),
             (8, 9),
         ]
-        g = Graph(
-            nodes,
-            edges,
-            layout='kamada_kawai',
+        nxg = nx.Graph()
+        nxg.add_nodes_from(nodes)
+        nxg.add_edges_from(edges)
+        g = Graph.from_networkx(
+            nxg,
+            layout="kamada_kawai",
             labels=True,
             layout_scale=3.4,
         )
@@ -29,11 +38,23 @@ class SampleGraph(Scene):
 
         # Create star walker
         star = Star(n=5, outer_radius=0.5, inner_radius=0.3, density=2)
-        init_pos = 2 * RIGHT  # initial position of the star
         star.shift(init_pos)
         star.set_fill(BLUE, opacity=0.8)
         self.play(Create(star))
+        self.wait(0.1)
 
         # Move walker to node 0
-        self.play(star.animate.shift(g[0].get_center() - init_pos))
+        relative_shift = g[init_node].get_center() - star.get_center()
+        self.play(star.animate.shift(relative_shift))
+        self.wait(1)
+
+        cur_node = init_node
+        for _ in range(walk_length):
+            next_node = random.choice(list(nxg[cur_node]))
+            cur_node = next_node
+
+            relative_shift = g[cur_node].get_center() - star.get_center()
+            self.play(star.animate.shift(relative_shift), run_time=0.5)
+            self.wait(0.1)
+
         self.wait(1)
