@@ -10,7 +10,7 @@ from manimlib.utils.rate_functions import there_and_back
 from manimlib.utils.space_ops import center_of_mass
 
 
-class Graph():
+class Graph:
     def __init__(self):
         # List of points in R^3
         # vertices = []
@@ -32,17 +32,15 @@ class Graph():
 
 class CubeGraph(Graph):
     """
-     5  7
-      12
-      03
-     4  6
+    5  7
+     12
+     03
+    4  6
     """
 
     def construct(self):
         self.vertices = [
-            (x, y, 0)
-            for r in (1, 2)
-            for x, y in it.product([-r, r], [-r, r])
+            (x, y, 0) for r in (1, 2) for x, y in it.product([-r, r], [-r, r])
         ]
         self.edges = [
             (0, 1),
@@ -70,10 +68,10 @@ class CubeGraph(Graph):
 
 class SampleGraph(Graph):
     """
-      4 2  3     8
-       0 1
-              7
-     5   6
+     4 2  3     8
+      0 1
+             7
+    5   6
     """
 
     def construct(self):
@@ -195,71 +193,61 @@ class DiscreteGraphScene(Scene):
         self._points = list(map(np.array, self.graph.vertices))
         self.vertices = self.dots = [Dot(p) for p in self._points]
         self.edges = self.lines = [
-            Line(self._points[i], self._points[j])
-            for i, j in self.graph.edges
+            Line(self._points[i], self._points[j]) for i, j in self.graph.edges
         ]
         self.add(*self.dots + self.edges)
 
     def generate_regions(self):
-        regions = [
-            self.region_from_cycle(cycle)
-            for cycle in self.graph.region_cycles
-        ]
+        regions = [self.region_from_cycle(cycle) for cycle in self.graph.region_cycles]
         regions[-1].complement()  # Outer region painted outwardly...
         self.regions = regions
 
     def region_from_cycle(self, cycle):
         point_pairs = [
-            [
-                self._points[cycle[i]],
-                self._points[cycle[(i + 1) % len(cycle)]]
-            ]
+            [self._points[cycle[i]], self._points[cycle[(i + 1) % len(cycle)]]]
             for i in range(len(cycle))
         ]
-        return region_from_line_boundary(
-            *point_pairs, shape=self.shape
-        )
+        return region_from_line_boundary(*point_pairs, shape=self.shape)
 
     def draw_vertices(self, **kwargs):
         self.clear()
         self.play(ShowCreation(Mobject(*self.vertices), **kwargs))
 
     def draw_edges(self):
-        self.play(*[
-            ShowCreation(edge, run_time=1.0)
-            for edge in self.edges
-        ])
+        self.play(*[ShowCreation(edge, run_time=1.0) for edge in self.edges])
 
     def accent_vertices(self, **kwargs):
         self.remove(*self.vertices)
         start = Mobject(*self.vertices)
-        end = Mobject(*[
-            Dot(point, radius=3 * Dot.DEFAULT_RADIUS, color="lightgreen")
-            for point in self._points
-        ])
-        self.play(Transform(
-            start, end, rate_func=there_and_back,
-            **kwargs
-        ))
+        end = Mobject(
+            *[
+                Dot(point, radius=3 * Dot.DEFAULT_RADIUS, color="lightgreen")
+                for point in self._points
+            ]
+        )
+        self.play(Transform(start, end, rate_func=there_and_back, **kwargs))
         self.remove(start)
         self.add(*self.vertices)
 
     def replace_vertices_with(self, mobject):
         mobject.center()
         diameter = max(mobject.get_height(), mobject.get_width())
-        self.play(*[
-            CounterclockwiseTransform(
-                vertex,
-                mobject.copy().shift(vertex.get_center())
-            )
-            for vertex in self.vertices
-        ] + [
-            ApplyMethod(
-                edge.scale,
-                (edge.get_length() - diameter) / edge.get_length()
-            )
-            for edge in self.edges
-        ])
+        self.play(
+            *[
+                CounterclockwiseTransform(
+                    vertex,
+                    mobject.copy().shift(vertex.get_center()),
+                )
+                for vertex in self.vertices
+            ]
+            + [
+                ApplyMethod(
+                    edge.scale,
+                    (edge.get_length() - diameter) / edge.get_length(),
+                )
+                for edge in self.edges
+            ]
+        )
 
     def annotate_edges(self, mobject, fade_in=True, **kwargs):
         angles = list(map(np.arctan, list(map(Line.get_slope, self.edges))))
@@ -268,10 +256,7 @@ class DiscreteGraphScene(Scene):
             for angle, edge in zip(angles, self.edges)
         ]
         if fade_in:
-            self.play(*[
-                FadeIn(ann, **kwargs)
-                for ann in self.edge_annotations
-            ])
+            self.play(*[FadeIn(ann, **kwargs) for ann in self.edge_annotations])
 
     def trace_cycle(self, cycle=None, color="yellow", run_time=2.0):
         if cycle is None:
@@ -279,14 +264,13 @@ class DiscreteGraphScene(Scene):
         time_per_edge = run_time / len(cycle)
         next_in_cycle = it.cycle(cycle)
         next(next_in_cycle)  # jump one ahead
-        self.traced_cycle = Mobject(*[
-            Line(self._points[i], self._points[j]).set_color(color)
-            for i, j in zip(cycle, next_in_cycle)
-        ])
-        self.play(
-            ShowCreation(self.traced_cycle),
-            run_time=run_time
+        self.traced_cycle = Mobject(
+            *[
+                Line(self._points[i], self._points[j]).set_color(color)
+                for i, j in zip(cycle, next_in_cycle)
+            ]
         )
+        self.play(ShowCreation(self.traced_cycle), run_time=run_time)
 
     def generate_spanning_tree(self, root=0, color="yellow"):
         self.spanning_tree_root = 0
@@ -303,13 +287,12 @@ class DiscreteGraphScene(Scene):
                     self.spanning_tree_index_pairs.append(pair)
                     spanned_vertices.add(pair[1])
                     to_check.add(pair[1])
-        self.spanning_tree = Mobject(*[
-            Line(
-                self._points[pair[0]],
-                self._points[pair[1]]
-            ).set_color(color)
-            for pair in self.spanning_tree_index_pairs
-        ])
+        self.spanning_tree = Mobject(
+            *[
+                Line(self._points[pair[0]], self._points[pair[1]]).set_color(color)
+                for pair in self.spanning_tree_index_pairs
+            ]
+        )
 
     def generate_treeified_spanning_tree(self):
         bottom = -FRAME_Y_RADIUS + 1
@@ -321,10 +304,9 @@ class DiscreteGraphScene(Scene):
         color = self.spanning_tree.get_color()
         indices = list(range(len(self._points)))
         # Build dicts
-        parent_of = dict([
-            tuple(reversed(pair))
-            for pair in self.spanning_tree_index_pairs
-        ])
+        parent_of = dict(
+            [tuple(reversed(pair)) for pair in self.spanning_tree_index_pairs],
+        )
         children_of = dict([(index, []) for index in indices])
         for child in parent_of:
             children_of[parent_of[child]].append(child)
@@ -339,10 +321,10 @@ class DiscreteGraphScene(Scene):
             next_generation = children_of[index]
             curr_max = max(1, len(next_generation))
             while next_generation != []:
-                next_generation = reduce(op.add, [
-                    children_of[node]
-                    for node in next_generation
-                ])
+                next_generation = reduce(
+                    op.add,
+                    [children_of[node] for node in next_generation],
+                )
                 curr_max = max(curr_max, len(next_generation))
             width_of[index] = x_sep * (curr_max - 1)
         to_process = [root]
@@ -358,31 +340,23 @@ class DiscreteGraphScene(Scene):
             to_process += children
 
         new_points = [
-            np.array([
-                x_coord_of[index],
-                y_coord_of[index],
-                0
-            ])
-            for index in indices
+            np.array([x_coord_of[index], y_coord_of[index], 0]) for index in indices
         ]
-        self.treeified_spanning_tree = Mobject(*[
-            Line(new_points[i], new_points[j]).set_color(color)
-            for i, j in self.spanning_tree_index_pairs
-        ])
+        self.treeified_spanning_tree = Mobject(
+            *[
+                Line(new_points[i], new_points[j]).set_color(color)
+                for i, j in self.spanning_tree_index_pairs
+            ]
+        )
 
     def generate_dual_graph(self):
         point_at_infinity = np.array([np.inf] * 3)
         cycles = self.graph.region_cycles
         self.dual_points = [
-            center_of_mass([
-                self._points[index]
-                for index in cycle
-            ])
-            for cycle in cycles
+            center_of_mass([self._points[index] for index in cycle]) for cycle in cycles
         ]
         self.dual_vertices = [
-            Dot(point).set_color("green")
-            for point in self.dual_points
+            Dot(point).set_color("green") for point in self.dual_points
         ]
         self.dual_vertices[-1] = Circle().scale(FRAME_X_RADIUS + FRAME_Y_RADIUS)
         self.dual_points[-1] = point_at_infinity
@@ -395,19 +369,15 @@ class DiscreteGraphScene(Scene):
                     continue
                 index1, index2 = cycle.index(pair[0]), cycle.index(pair[1])
                 if abs(index1 - index2) in [1, len(cycle) - 1]:
-                    dual_point_pair.append(
-                        self.dual_points[cycles.index(cycle)]
-                    )
-            assert(len(dual_point_pair) == 2)
+                    dual_point_pair.append(self.dual_points[cycles.index(cycle)])
+            assert len(dual_point_pair) == 2
             for i in 0, 1:
                 if all(dual_point_pair[i] == point_at_infinity):
                     new_point = np.array(dual_point_pair[1 - i])
-                    vect = center_of_mass([
-                        self._points[pair[0]],
-                        self._points[pair[1]]
-                    ]) - new_point
+                    vect = (
+                        center_of_mass([self._points[pair[0]], self._points[pair[1]]])
+                        - new_point
+                    )
                     new_point += FRAME_X_RADIUS * vect / get_norm(vect)
                     dual_point_pair[i] = new_point
-            self.dual_edges.append(
-                Line(*dual_point_pair).set_color()
-            )
+            self.dual_edges.append(Line(*dual_point_pair).set_color())
