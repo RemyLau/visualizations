@@ -5,6 +5,8 @@ from manim import *
 
 GRAPH_POS = 2.8 * LEFT + 0.3 * UP
 WALKER_POS = RIGHT
+WALK_LENGTH = 15
+TEST = False
 
 
 def get_walker(color=BLUE, pos=WALKER_POS):
@@ -47,30 +49,29 @@ class RandomWalkOnGraph(Scene):
     def construct(self):
         random.seed(0)
         init_node = 1
-        walk_length = 20
         font_size = 36
         text_pos = 2.4 * RIGHT + 0.6 * UP
 
         nxg, g = get_graph()
         self.play(Create(g))
-        self.wait(2)
+        self.wait(2 if not TEST else 0.1)
 
         # Create walker
         walker = get_walker()
         self.play(Create(walker))
-        self.wait(2)
+        self.wait(2 if not TEST else 0.1)
 
         # Move walker to node 0
         relative_shift = g[init_node].get_center() - walker.get_center()
         self.play(walker.animate.shift(relative_shift))
-        self.wait(2)
+        self.wait(2 if not TEST else 0.1)
 
         text1 = Text(r"Real random walker", font_size=font_size)
         text2 = Text(r"Not an actor", font_size=font_size)
 
         # Generate random walk starting from init node
         cur_node = init_node
-        for i in range(walk_length):
+        for i in range(WALK_LENGTH if not TEST else 8):
             cur_node = random.choice(list(nxg[cur_node]))
 
             relative_shift = g[cur_node].get_center() - walker.get_center()
