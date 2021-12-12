@@ -21,9 +21,9 @@ def get_dot_node(n, G):
         The Dot VMobject.
     """
     n = G.nodes[n]
-    node = Dot(color=n.get('color', RED))
-    x, y = n['pos']
-    node.move_to(x*RIGHT + y*UP)
+    node = Dot(color=n.get("color", RED))
+    x, y = n["pos"]
+    node.move_to(x * RIGHT + y * UP)
     return node
 
 
@@ -41,13 +41,11 @@ def get_line_edge(ed, G):
     """
     n1 = G.nodes[ed[0]]
     n2 = G.nodes[ed[1]]
-    x1, y1 = n1['pos']
-    x2, y2 = n2['pos']
-    start = x1*RIGHT + y1*UP
-    end = x2*RIGHT + y2*UP
-    return Line(start, end, color=n1.get('color', WHITE))
-
-# %%
+    x1, y1 = n1["pos"]
+    x2, y2 = n2["pos"]
+    start = x1 * RIGHT + y1 * UP
+    end = x2 * RIGHT + y2 * UP
+    return Line(start, end, color=n1.get("color", WHITE))
 
 
 def assign_positions(G, pos_func=nx.spring_layout, scale=np.array([6.5, 3.5])):
@@ -66,11 +64,9 @@ def assign_positions(G, pos_func=nx.spring_layout, scale=np.array([6.5, 3.5])):
         By default [6.5, 3.5] to fill manim's screen.
     """
     unscaled_pos = pos_func(G)
-    positions = {k: v*scale for k, v in unscaled_pos.items()}
+    positions = {k: v * scale for k, v in unscaled_pos.items()}
     for node, pos in positions.items():
-        G.nodes[node]['pos'] = pos
-
-# %%
+        G.nodes[node]["pos"] = pos
 
 
 class ManimGraph(VGroup):
@@ -96,9 +92,7 @@ class ManimGraph(VGroup):
         Dict mapping mob_id -> edge key
     """
 
-    def __init__(self, graph,
-                 get_node=get_dot_node,
-                 get_edge=get_line_edge, **kwargs):
+    def __init__(self, graph, get_node=get_dot_node, get_edge=get_line_edge, **kwargs):
         super().__init__(**kwargs)
         self.graph = graph
         self.get_edge = get_edge
@@ -111,7 +105,7 @@ class ManimGraph(VGroup):
         self.id_to_edge = {}
 
         n = list(self.graph.nodes())[0]
-        if 'pos' not in self.graph.nodes[n].keys():
+        if "pos" not in self.graph.nodes[n].keys():
             assign_positions(self.graph)
 
         self.count = 0
@@ -122,7 +116,7 @@ class ManimGraph(VGroup):
         """Create nodes using get_node and add to submobjects and nodes dict."""
         for node in self.graph.nodes:
             n = self.get_node(node, self.graph)
-            self.graph.nodes[node]['mob_id'] = self.count
+            self.graph.nodes[node]["mob_id"] = self.count
             self.nodes[self.count] = n
             self.id_to_node[self.count] = node
             self.add(n)
@@ -131,7 +125,7 @@ class ManimGraph(VGroup):
     def _add_edges(self):
         """Create edges using get_edge and add to submobjects and edges dict."""
         for edge in self.graph.edges:
-            self.graph.edges[edge]['mob_id'] = self.count
+            self.graph.edges[edge]["mob_id"] = self.count
             e = self.get_edge(edge, self.graph)
             self.edges[self.count] = e
             self.id_to_edge[self.count] = edge
@@ -151,9 +145,7 @@ class ManimGraph(VGroup):
         new : string
             New label.
         """
-        self.id_to_node[g.node[new]['mob_id']] = new
-
-# %%
+        self.id_to_node[g.node[new]["mob_id"]] = new
 
 
 class TransformAndRemoveSource(Transform):
@@ -162,10 +154,7 @@ class TransformAndRemoveSource(Transform):
         scene.remove(self.mobject)
 
 
-# %%
-def transform_graph(mng, G,
-                    node_transform=Transform,
-                    edge_transform=Transform):
+def transform_graph(mng, G, node_transform=Transform, edge_transform=Transform):
     """Transforms the graph in ManimGraph mng to the graph G.
     This is better than just using Transform because it keeps edges and
     nodes which don't change stationary, unlike Transform which mixes up
@@ -209,20 +198,21 @@ def transform_graph(mng, G,
     # NODES
     for node, node_data in G.nodes.items():
         new_node = mng.get_node(node, G)
-        if 'mob_id' not in node_data.keys():
-            G.nodes[node]['mob_id'] = mng.count
+        if "mob_id" not in node_data.keys():
+            G.nodes[node]["mob_id"] = mng.count
             mng.count += 1
 
-        mob_id = node_data['mob_id']
+        mob_id = node_data["mob_id"]
         new_ids.append(mob_id)
 
         if mob_id in old_ids:
             # if mng.graph.nodes[mng.id_to_node[mob_id]] != node_data:
             anims.append(node_transform(mng.nodes[mob_id], new_node))
         else:
-            if 'expansion' in node_data.keys():
-                objs = [id_to_mobj[o['mob_id']]
-                        for o in node_data['expansion'].values()]
+            if "expansion" in node_data.keys():
+                objs = [
+                    id_to_mobj[o["mob_id"]] for o in node_data["expansion"].values()
+                ]
                 anims.append(TransformFromCopy(VGroup(*objs), new_node))
             else:
                 anims.append(FadeIn(new_node))
@@ -234,11 +224,11 @@ def transform_graph(mng, G,
     # EDGES
     for edge, edge_data in G.edges.items():
         new_edge = mng.get_edge(edge, G)
-        if 'mob_id' not in edge_data.keys():
-            G.edges[edge]['mob_id'] = mng.count
+        if "mob_id" not in edge_data.keys():
+            G.edges[edge]["mob_id"] = mng.count
             mng.count += 1
 
-        mob_id = edge_data['mob_id']
+        mob_id = edge_data["mob_id"]
         new_ids.append(mob_id)
 
         if mob_id in old_ids:
@@ -248,9 +238,10 @@ def transform_graph(mng, G,
             # if mng.graph.edges[mng.id_to_edge[mob_id]] != edge_data:
             anims.append(edge_transform(mng.edges[mob_id], new_edge))
         else:
-            if 'expansion' in edge_data.keys():
-                objs = [id_to_mobj[o['mob_id']]
-                        for o in edge_data['expansion'].values()]
+            if "expansion" in edge_data.keys():
+                objs = [
+                    id_to_mobj[o["mob_id"]] for o in edge_data["expansion"].values()
+                ]
                 anims.append(TransformFromCopy(VGroup(*objs), new_edge))
             else:
                 anims.append(FadeIn(new_edge))
@@ -262,16 +253,16 @@ def transform_graph(mng, G,
     # --------- REMOVALS AND CONTRACTIONS ----------
     # NODES
     for node, node_data in mng.graph.nodes.items():
-        mob_id = node_data['mob_id']
+        mob_id = node_data["mob_id"]
         if mob_id in new_ids:
             continue
 
         contracts_to = []
         for node2, node_data in G.nodes.items():
-            for c2 in node_data.get('contraction', {}).values():
-                if mob_id == c2['mob_id']:
+            for c2 in node_data.get("contraction", {}).values():
+                if mob_id == c2["mob_id"]:
                     contracts_to.append(
-                        mng.get_node(mng.id_to_node[node_data['mob_id']], G)
+                        mng.get_node(mng.id_to_node[node_data["mob_id"]], G),
                     )
                     break
 
@@ -291,16 +282,16 @@ def transform_graph(mng, G,
 
     # EDGES
     for edge, edge_data in mng.graph.edges.items():
-        mob_id = edge_data['mob_id']
+        mob_id = edge_data["mob_id"]
         if mob_id in new_ids:
             continue
 
         contracts_to = []
         for edge2, edge_data in G.edges.items():
-            for c2 in edge_data.get('contraction', {}).values():
-                if mob_id == c2['mob_id']:
+            for c2 in edge_data.get("contraction", {}).values():
+                if mob_id == c2["mob_id"]:
                     contracts_to.append(
-                        mng.get_edge(mng.id_to_edge[edge_data['mob_id']], G)
+                        mng.get_edge(mng.id_to_edge[edge_data["mob_id"]], G),
                     )
                     break
 
@@ -318,14 +309,12 @@ def transform_graph(mng, G,
     return anims
 
 
-# %%
 def shift_nodes(nodes, shift, fg):
     """Shift the pos of nodes in fg by shift in-place."""
     for node in nodes:
-        fg.nodes[node]['pos'] += shift
+        fg.nodes[node]["pos"] += shift
 
 
-# %%
 def map_attr(attr, keys, values, fg):
     """Map the values to the `attr` attribute of elements in fg.
     If keys are singletons, assumes that they are nodes. In all other cases,
