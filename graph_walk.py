@@ -50,7 +50,7 @@ class RandomWalkOnGraph(Scene):
         random.seed(0)
         init_node = 1
         font_size = 36
-        text_pos = 2.4 * RIGHT + 0.6 * UP
+        txt_pos = 2.4 * RIGHT + 0.6 * UP
 
         nxg, g = get_graph()
         self.play(Create(g))
@@ -66,8 +66,8 @@ class RandomWalkOnGraph(Scene):
         self.play(walker.animate.shift(relative_shift))
         self.wait(2 if not TEST else 0.1)
 
-        text1 = Text(r"Real random walker", font_size=font_size)
-        text2 = Text(r"Not an actor", font_size=font_size)
+        txt1 = Text(r"Real random walker", font_size=font_size)
+        txt2 = Text(r"Not an actor", font_size=font_size)
 
         # Generate random walk starting from init node
         cur_node = init_node
@@ -79,11 +79,68 @@ class RandomWalkOnGraph(Scene):
             self.wait(0.1)
 
             if i == 1:
-                self.add(text1.shift(text_pos))
+                self.add(txt1.shift(txt_pos))
                 self.wait(0.1)
 
             if i == 5:
-                self.add(text2.shift(text_pos + 0.6 * DOWN))
+                self.add(txt2.shift(txt_pos + 0.6 * DOWN))
                 self.wait(0.1)
 
         self.wait(1)
+
+
+class RandomWalk(Scene):
+    def setup_scene(self, init_node=1):
+        self.nxg, self.g = get_graph()
+        self.walker = get_walker()
+        self.walker.shift(
+            self.g[init_node].get_center() - self.walker.get_center()
+        )
+        self.add(self.g, self.walker)
+
+
+class TransitionProbability(RandomWalk):
+    def construct(self):
+        eqn_font_size = 32
+        eqn_pos = 2.4 * RIGHT + 2.5 * UP
+
+        self.setup_scene()
+        self.wait(1 if not TEST else 0.1)
+
+        nodes_to_remove = [4, 5, 6, 7, 8, 9]
+        #self.play(self.g.animate.remove_vertices(*nodes_to_remove))
+        self.g.remove_vertices(*nodes_to_remove)
+        self.g.remove_edges((2, 3))
+        self.wait(5 if not TEST else 0.1)
+
+        eqn1 = MathTex(
+            r"\mathbb{P}(v \in \mathcal{N}(u) | u) = \frac1{|\mathcal{N}(u)|}",
+            font_size=eqn_font_size
+        ).shift(eqn_pos)
+
+        eqn2 = MathTex(
+            r"\mathbb{P}(n_3 | n_1) = \mathbb{P}(n_2 | n_1) = \mathbb{P}(n_0 | n_1) = \frac13",
+            font_size=eqn_font_size
+        ).shift(eqn_pos + DOWN)
+
+        txt3= Text(
+            "Could also work with weighted graphs:",
+            font_size=eqn_font_size
+        ).shift(eqn_pos + 2.5 * DOWN)
+
+        eqn4 = MathTex(
+            r"\mathbb{P}(v \in \mathcal{N}(u) | v) = \frac{w(u,v)}{\sum_{v' \in \mathcal{N}(u)}w(u, v')}",
+            font_size=eqn_font_size
+        ).shift(eqn_pos + 3.5 * DOWN)
+
+        self.add(eqn1)
+        self.wait(4 if not TEST else 0.1)
+
+        self.add(eqn2)
+        self.wait(5 if not TEST else 0.1)
+
+        self.add(txt3)
+        self.wait(1 if not TEST else 0.1)
+
+        self.add(eqn4)
+        self.wait(1 if not TEST else 0.1)
