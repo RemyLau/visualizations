@@ -1,7 +1,6 @@
 import networkx as nx
 import numpy as np
-
-from manimlib.imports import *
+from manim import *
 
 # outsource exact details of node and edge creation to user
 # provide convenience functions for moving nodes and edges
