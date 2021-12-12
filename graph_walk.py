@@ -3,6 +3,36 @@ import random
 import networkx as nx
 from manim import *
 
+GRAPH_POS = 2.8 * LEFT + 0.3 * UP
+
+def get_graph():
+    nodes = list(range(10))
+    edges = [
+        (0, 1),
+        (1, 2),
+        (1, 3),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (4, 6),
+        (2, 7),
+        (7, 8),
+        (8, 9),
+    ]
+
+    nxg = nx.Graph()
+    nxg.add_nodes_from(nodes)
+    nxg.add_edges_from(edges)
+
+    g = Graph.from_networkx(
+        nxg,
+        layout="kamada_kawai",
+        labels=True,
+        layout_scale=3.4,
+    ).shift(GRAPH_POS)
+
+    return nxg, g
+
 
 class RandomWalkOnGraph(Scene):
     def construct(self):
@@ -12,31 +42,8 @@ class RandomWalkOnGraph(Scene):
         font_size = 36
         star_pos = RIGHT
         text_pos = 2.4 * RIGHT + 0.6 * UP
-        graph_pos = 2.8 * LEFT + 0.3 * UP
 
-        # Create graph
-        nodes = list(range(10))
-        edges = [
-            (0, 1),
-            (1, 2),
-            (1, 3),
-            (2, 3),
-            (3, 4),
-            (4, 5),
-            (4, 6),
-            (2, 7),
-            (7, 8),
-            (8, 9),
-        ]
-        nxg = nx.Graph()
-        nxg.add_nodes_from(nodes)
-        nxg.add_edges_from(edges)
-        g = Graph.from_networkx(
-            nxg,
-            layout="kamada_kawai",
-            labels=True,
-            layout_scale=3.4,
-        ).shift(graph_pos)
+        nxg, g = get_graph()
         self.play(Create(g))
         self.wait(2)
 
