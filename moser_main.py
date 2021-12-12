@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-import numpy as np
 import itertools as it
 import operator as op
 from copy import deepcopy
 from random import random, randint
 import sys
 import inspect
+from functools import reduce
 
+import numpy as np
 from manim_imports_ext import *
 from script_wrapper import command_line_create_scene
-from functools import reduce
 
 RADIUS = FRAME_Y_RADIUS - 0.1
 CIRCLE_DENSITY = DEFAULT_POINT_DENSITY_1D * RADIUS

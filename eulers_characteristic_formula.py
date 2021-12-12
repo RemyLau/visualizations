@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 
-
-import numpy as np
 import itertools as it
 from copy import deepcopy
-import sys
 
-
+import numpy as np
+import displayer as disp
 from animation import *
 from mobject import *
 from constants import *
 from mobject.region import *
-import displayer as disp
 from scene.scene import Scene, GraphScene
 from scene.graphs import *
 from .moser_main import EulersFormula
