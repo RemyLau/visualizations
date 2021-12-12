@@ -1,6 +1,21 @@
 from manim import *
 import networkx as nx
-from manimnx import ManimGraph
+
+
+def get_sample_graph():
+    nodes = list(range(9))
+    edges = [
+        (0, 1),
+        (1, 2),
+        (1, 3),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (4, 6),
+        (2, 7),
+        (7, 8),
+    ]
+    return Graph(nodes, edges, layout='spring')
 
 
 class LineExample(Scene):
@@ -22,9 +37,12 @@ class LineExample(Scene):
         l.put_start_and_end_on(d[4].get_center(), d[7].get_center())
         self.wait()
 
-class RandomGraph(Scene):
-    def construct(self):
-        g = ManimGraph(nx.erdos_renyi_graph(10, 0.5))
 
-        self.play(*[Create(m) for m in g])  # show random graph creation
+class SampleGraph(Scene):
+    def construct(self):
+        g = get_sample_graph()
+        self.play(Create(g))
+
+        star = Star(5, outer_radius=0.4, density=2, color=BLUE)
+        self.play(Create(star))
         self.wait(1)
