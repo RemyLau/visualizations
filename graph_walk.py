@@ -90,7 +90,7 @@ class RandomWalkOnGraph(Scene):
 
 
 class RandomWalk(Scene):
-    def setup_scene(self, init_node=1, walker_color=BLUE):
+    def setup_scene_single(self, init_node=1, walker_color=BLUE):
         self.nxg, self.g = get_graph()
         self.walker = get_walker(pos=init_node, color=walker_color)
         self.walker.shift(
@@ -98,13 +98,23 @@ class RandomWalk(Scene):
         )
         self.add(self.g, self.walker)
 
+    def setup_scene_multi(self, init_nodes=(1,), walker_colors=(BLUE,)):
+        self.nxg, self.g = get_graph()
+        self.walkers = []
+        for init_node, walker_color in zip(init_nodes, walker_colors):
+            self.walkers.append(get_walker(pos=init_node, color=walker_color))
+            self.walkers[-1].shift(
+                self.g[init_node].get_center() - self.walkers[-1].get_center()
+            )
+        self.add(self.g, *self.walkers)
+
 
 class TransitionProbability(RandomWalk):
     def construct(self):
         eqn_font_size = 32
         eqn_pos = 2.4 * RIGHT + 2.5 * UP
 
-        self.setup_scene()
+        self.setup_scene_single()
         self.wait(1 if not TEST else 0.1)
 
         nodes_to_remove = [4, 5, 6, 7, 8, 9]
@@ -160,7 +170,7 @@ class RecordSingleRandomWalk(RandomWalk):
         txt1 = Text(r"Real random walker", font_size=font_size)
         txt2 = Text(r"Not an actor", font_size=font_size)
 
-        self.setup_scene(init_node=init_node, walker_color=walker_color)
+        self.setup_scene_single(init_node=init_node, walker_color=walker_color)
 
         # Generate random walk starting from init node
         cur_node = init_node
@@ -205,3 +215,39 @@ class RecordSingleRandomWalk(RandomWalk):
             if i == 9:
                 self.add(txt2.shift(txt_pos + 0.6 * DOWN))
                 self.wait(0.1)
+
+
+class RecordMultiRandomWalk(RandomWalk):
+    def construct(self):
+        random.seed(0)
+        font_size = 36
+        txt_pos = 2.4 * RIGHT + 0.6 * UP
+        walk_hist_pos = 1.2 * RIGHT + 2.5 * UP
+        walk_hist_font_size = 29
+        walk_hist_record_length = 9
+
+        init_nodes = (1, 5, 6, 7, 9)
+        walker_colors = (BLUE, YELLOW, RED, PURPLE, ORANGE)
+
+        self.setup_scene_multi(init_nodes=init_nodes, walker_colors=walker_colors)
+
+        # Generate random walk starting from init node
+        cur_nodes = list(init_nodes)
+        for i, (init_node, walker_color) in enumerate(zip(init_nodes, walker_colors)):
+            self.add(
+                Text(
+                    str(init_node),
+                    font_size=walk_hist_font_size,
+                    color=walker_color,
+                ).shift(walk_hist_pos + i * 1.1 * DOWN)
+            )
+        self.wait(1 if not TEST else 0.1)
+
+        for i in range(WALK_LENGTH if not TEST else 12):
+            walker_group = []
+            for j, walker in enumerate(self.walkers):
+                cur_nodes[j] = random.choice(list(self.nxg[cur_nodes[j]]))
+                relative_shift = self.g[cur_nodes[j]].get_center() - walker.get_center()
+                walker_group.append(walker.animate.shift(relative_shift))
+
+            self.play(AnimationGroup(*walker_group, lag_ratio=0.2, run_time=0.7))
