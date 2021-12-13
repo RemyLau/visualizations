@@ -7,6 +7,9 @@ GRAPH_POS = 2.8 * LEFT + 0.3 * UP
 WALKER_POS = RIGHT
 WALK_LENGTH = 24
 TEST = False
+WALK_HIST_RECORD_LENGTH = 8
+WALK_HIST_POS = 1.2 * RIGHT + 2.5 * UP
+WALK_HIST_FONT_SIZE = 30
 
 
 def get_walker(pos=WALKER_POS, color=BLUE):
@@ -66,8 +69,8 @@ class RandomWalkOnGraph(Scene):
         self.play(walker.animate.shift(relative_shift))
         self.wait(2 if not TEST else 0.1)
 
-        txt1 = Text(r"Real random walker", font_size=font_size)
-        txt2 = Text(r"Not an actor", font_size=font_size)
+        txt1 = Text(r"Real random walker", font_size=font_size).shift(txt_pos)
+        txt2 = Text(r"Not an actor", font_size=font_size).shift(txt_pos + 0.6 * DOWN)
 
         # Generate random walk starting from init node
         cur_node = init_node
@@ -76,15 +79,12 @@ class RandomWalkOnGraph(Scene):
 
             relative_shift = g[cur_node].get_center() - walker.get_center()
             self.play(walker.animate.shift(relative_shift), run_time=0.8)
-            self.wait(0.1)
 
-            if i == 1:
-                self.add(txt1.shift(txt_pos))
-                self.wait(0.1)
+            if i == 6:
+                self.add(txt1)
 
-            if i == 5:
-                self.add(txt2.shift(txt_pos + 0.6 * DOWN))
-                self.wait(0.1)
+            if i == 10:
+                self.add(txt2)
 
         self.wait(1)
 
@@ -143,32 +143,23 @@ class TransitionProbability(RandomWalk):
             font_size=eqn_font_size
         ).shift(eqn_pos + 3.5 * DOWN)
 
-        self.add(eqn1)
+        self.play(Write(eqn1))
         self.wait(4 if not TEST else 0.1)
 
-        self.add(eqn2)
+        self.play(Write(eqn2))
         self.wait(5 if not TEST else 0.1)
 
-        self.add(txt3)
-        self.wait(1 if not TEST else 0.1)
-
-        self.add(eqn4)
-        self.wait(1 if not TEST else 0.1)
+        self.play(Write(txt3))
+        self.play(FadeIn(eqn4, shift=DOWN))
+        self.wait(1)
 
 
 class RecordSingleRandomWalk(RandomWalk):
     def construct(self):
         random.seed(0)
         font_size = 36
-        txt_pos = 2.4 * RIGHT + 0.6 * UP
-        walk_hist_pos = 1.2 * RIGHT + 2.5 * UP
-        walk_hist_font_size = 30
-        walk_hist_record_length = 8
         walker_color = BLUE
         init_node = 1
-
-        txt1 = Text(r"Real random walker", font_size=font_size)
-        txt2 = Text(r"Not an actor", font_size=font_size)
 
         self.setup_scene_single(init_node=init_node, walker_color=walker_color)
 
@@ -177,9 +168,9 @@ class RecordSingleRandomWalk(RandomWalk):
         self.add(
             Tex(
                 str(init_node),
-                font_size=walk_hist_font_size,
+                font_size=WALK_HIST_FONT_SIZE,
                 color=walker_color,
-            ).shift(walk_hist_pos)
+            ).shift(WALK_HIST_POS + 0.2 * RIGHT)
         )
         self.wait(1 if not TEST else 0.1)
 
@@ -190,41 +181,27 @@ class RecordSingleRandomWalk(RandomWalk):
             self.play(self.walker.animate.shift(relative_shift), run_time=0.8)
             self.wait(0.1)
 
-            if i < walk_hist_record_length:
+            if i < WALK_HIST_RECORD_LENGTH:
                 # Record walk history
-                head = Text(
-                    str(cur_node),
-                    font_size=walk_hist_font_size,
+                head = MathTex(
+                    f"\\rightarrow {cur_node}",
+                    font_size=WALK_HIST_FONT_SIZE,
                     color=walker_color,
-                ).shift(walk_hist_pos + (i + 1) * 0.4 * RIGHT)
+                ).shift(WALK_HIST_POS + (i + 1) * 0.6 * RIGHT)
                 self.add(head)
-                self.wait(0.1)
-            elif i == walk_hist_record_length:
+            elif i == WALK_HIST_RECORD_LENGTH:
                 head = Tex(
                     r"\dots",
-                    font_size=walk_hist_font_size,
+                    font_size=WALK_HIST_FONT_SIZE,
                     color=walker_color,
-                ).shift(walk_hist_pos + (i + 1) * 0.4 * RIGHT)
+                ).shift(WALK_HIST_POS + (i + 1) * 0.6 * RIGHT)
                 self.add(head)
-                self.wait(0.1)
-
-            if i == 5:
-                self.add(txt1.shift(txt_pos))
-                self.wait(0.1)
-
-            if i == 9:
-                self.add(txt2.shift(txt_pos + 0.6 * DOWN))
-                self.wait(0.1)
 
 
 class RecordMultiRandomWalk(RandomWalk):
     def construct(self):
         random.seed(0)
         font_size = 36
-        txt_pos = 2.4 * RIGHT + 0.6 * UP
-        walk_hist_pos = 1.2 * RIGHT + 2.5 * UP
-        walk_hist_font_size = 30
-        walk_hist_record_length = 8
 
         init_nodes = (1, 5, 6, 7, 9)
         walker_colors = (BLUE, YELLOW, RED, PURPLE, ORANGE)
@@ -237,16 +214,16 @@ class RecordMultiRandomWalk(RandomWalk):
             self.add(
                 Tex(
                     str(init_node),
-                    font_size=walk_hist_font_size,
+                    font_size=WALK_HIST_FONT_SIZE,
                     color=walker_color,
-                ).shift(walk_hist_pos + i * 1.1 * DOWN)
+                ).shift(WALK_HIST_POS + i * 1.1 * DOWN + 0.2 * RIGHT)
             )
         self.add(
             Tex(
                 r"\vdots",
-                font_size=walk_hist_font_size,
+                font_size=WALK_HIST_FONT_SIZE,
                 color=WHITE
-            ).shift(walk_hist_pos + len(self.walkers) * 1.1 * DOWN)
+            ).shift(WALK_HIST_POS + len(self.walkers) * 1.1 * DOWN + 0.2 * RIGHT)
         )
         self.wait(1 if not TEST else 0.1)
 
@@ -257,23 +234,23 @@ class RecordMultiRandomWalk(RandomWalk):
                 relative_shift = self.g[cur_nodes[j]].get_center() - walker.get_center()
                 group.append(walker.animate.shift(relative_shift))
 
-                if i <= walk_hist_record_length:
+                if i <= WALK_HIST_RECORD_LENGTH:
                     head = MathTex(
-                        r"\dots" if i == walk_hist_record_length else f"\\rightarrow {cur_nodes[j]}",
-                        font_size=walk_hist_font_size,
+                        r"\dots" if i == WALK_HIST_RECORD_LENGTH else f"\\rightarrow {cur_nodes[j]}",
+                        font_size=WALK_HIST_FONT_SIZE,
                         color=walker_colors[j],
-                    ).shift(walk_hist_pos + (i + 1) * 0.6 * RIGHT + j * 1.1 * DOWN)
+                    ).shift(WALK_HIST_POS + (i + 1) * 0.6 * RIGHT + j * 1.1 * DOWN)
                     group.append(FadeIn(head))
 
-                    if i < walk_hist_record_length and j == len(self.walkers) - 1:
-                        head = Tex(r"\vdots", font_size=walk_hist_font_size, color=WHITE)
-                        head.shift(walk_hist_pos + (i + 1) * 0.6 * RIGHT + (j + 1) * 1.1 * DOWN)
+                    if i < WALK_HIST_RECORD_LENGTH and j == len(self.walkers) - 1:
+                        head = Tex(r"\vdots", font_size=WALK_HIST_FONT_SIZE, color=WHITE)
+                        head.shift(WALK_HIST_POS + (i + 1) * 0.6 * RIGHT + (j + 1) * 1.1 * DOWN + 0.2 * RIGHT)
                         group.append(FadeIn(head))
 
             self.play(
                 AnimationGroup(
                     *group,
-                    lag_ratio=0.1 if i == walk_hist_record_length else 0.2,
+                    lag_ratio=0.1 if i == WALK_HIST_RECORD_LENGTH else 0.2,
                     run_time=0.7,
                 )
             )
