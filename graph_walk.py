@@ -162,8 +162,8 @@ class RecordSingleRandomWalk(RandomWalk):
         font_size = 36
         txt_pos = 2.4 * RIGHT + 0.6 * UP
         walk_hist_pos = 1.2 * RIGHT + 2.5 * UP
-        walk_hist_font_size = 29
-        walk_hist_record_length = 9
+        walk_hist_font_size = 30
+        walk_hist_record_length = 8
         walker_color = BLUE
         init_node = 1
 
@@ -175,7 +175,7 @@ class RecordSingleRandomWalk(RandomWalk):
         # Generate random walk starting from init node
         cur_node = init_node
         self.add(
-            Text(
+            Tex(
                 str(init_node),
                 font_size=walk_hist_font_size,
                 color=walker_color,
@@ -223,8 +223,8 @@ class RecordMultiRandomWalk(RandomWalk):
         font_size = 36
         txt_pos = 2.4 * RIGHT + 0.6 * UP
         walk_hist_pos = 1.2 * RIGHT + 2.5 * UP
-        walk_hist_font_size = 29
-        walk_hist_record_length = 9
+        walk_hist_font_size = 30
+        walk_hist_record_length = 8
 
         init_nodes = (1, 5, 6, 7, 9)
         walker_colors = (BLUE, YELLOW, RED, PURPLE, ORANGE)
@@ -235,19 +235,45 @@ class RecordMultiRandomWalk(RandomWalk):
         cur_nodes = list(init_nodes)
         for i, (init_node, walker_color) in enumerate(zip(init_nodes, walker_colors)):
             self.add(
-                Text(
+                Tex(
                     str(init_node),
                     font_size=walk_hist_font_size,
                     color=walker_color,
                 ).shift(walk_hist_pos + i * 1.1 * DOWN)
             )
+        self.add(
+            Tex(
+                r"\vdots",
+                font_size=walk_hist_font_size,
+                color=WHITE
+            ).shift(walk_hist_pos + len(self.walkers) * 1.1 * DOWN)
+        )
         self.wait(1 if not TEST else 0.1)
 
         for i in range(WALK_LENGTH if not TEST else 12):
-            walker_group = []
+            group = []
             for j, walker in enumerate(self.walkers):
                 cur_nodes[j] = random.choice(list(self.nxg[cur_nodes[j]]))
                 relative_shift = self.g[cur_nodes[j]].get_center() - walker.get_center()
-                walker_group.append(walker.animate.shift(relative_shift))
+                group.append(walker.animate.shift(relative_shift))
 
-            self.play(AnimationGroup(*walker_group, lag_ratio=0.2, run_time=0.7))
+                if i <= walk_hist_record_length:
+                    head = MathTex(
+                        r"\dots" if i == walk_hist_record_length else f"\\rightarrow {cur_nodes[j]}",
+                        font_size=walk_hist_font_size,
+                        color=walker_colors[j],
+                    ).shift(walk_hist_pos + (i + 1) * 0.6 * RIGHT + j * 1.1 * DOWN)
+                    group.append(FadeIn(head))
+
+                    if i < walk_hist_record_length and j == len(self.walkers) - 1:
+                        head = Tex(r"\vdots", font_size=walk_hist_font_size, color=WHITE)
+                        head.shift(walk_hist_pos + (i + 1) * 0.6 * RIGHT + (j + 1) * 1.1 * DOWN)
+                        group.append(FadeIn(head))
+
+            self.play(
+                AnimationGroup(
+                    *group,
+                    lag_ratio=0.1 if i == walk_hist_record_length else 0.2,
+                    run_time=0.7,
+                )
+            )
