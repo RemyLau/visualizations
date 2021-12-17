@@ -150,7 +150,7 @@ class TransitionProbability(RandomWalk):
         ).shift(eqn_pos + 2.5 * DOWN)
 
         eqn4 = MathTex(
-            r"\mathbb{P}(v \in \mathcal{N}(u) | v) = \frac{w(u,v)}{\sum_{v' \in \mathcal{N}(u)}w(u, v')}",
+            r"\mathbb{P}(v \in \mathcal{N}(u) | u) = \frac{w(u,v)}{\sum_{v' \in \mathcal{N}(u)}w(u, v')}",
             font_size=eqn_font_size
         ).shift(eqn_pos + 3.5 * DOWN)
 
@@ -173,6 +173,175 @@ class TransitionProbability(RandomWalk):
             )
         )
         self.wait(1)
+
+
+class TransitionProbabilitySecondOrder(RandomWalk):
+    def construct(self):
+        title_font_size = 24
+        txt_font_size = 21
+        eqn_font_size = 26
+        title_pos = RIGHT + 2.5 * UP
+
+        # Setup title: 2nd order transition illustration
+        title = Text(
+            r"Second order transition ",
+            font_size=title_font_size,
+        ).shift(title_pos)
+        title_note = Text(
+            r"(depends on the previous node)",
+            font_size=title_font_size,
+        ).next_to(title, RIGHT)
+        box_take_home = SurroundingRectangle(title_note)
+
+        self.setup_scene_single()
+        nodes_to_remove = [4, 5, 6, 7, 8, 9]
+        self.g.remove_vertices(*nodes_to_remove)
+        self.add(title, title_note)
+        self.wait(5)
+
+        # Key idea of three different types of edges
+        txt_idea = Text(
+            r"Key idea: flexibly reweight 3 different types of edges",
+            font_size=txt_font_size,
+        ).next_to(title, DOWN).align_to(title, LEFT).shift(0.2 * RIGHT)
+
+        txt_in = Text(
+            "in",
+            font_size=txt_font_size,
+        ).next_to(txt_idea, DOWN).align_to(txt_idea, LEFT)
+        box_in = SurroundingRectangle(txt_in, color=WHITE)
+
+        txt_out = Text(
+            "out",
+            font_size=txt_font_size,
+            color=YELLOW,
+        ).next_to(txt_in, RIGHT)
+        box_out = SurroundingRectangle(txt_out, color=YELLOW)
+
+        txt_return = Text(
+            "return",
+            font_size=txt_font_size,
+            color=RED,
+        ).next_to(txt_out, RIGHT)
+        box_return = SurroundingRectangle(txt_return, color=RED)
+
+        # Setup example with current node = n1, and previous node = n3
+        txt_ex = MathTex(
+            r"Example: ",
+            font_size=eqn_font_size,
+        ).next_to(txt_in, DOWN).align_to(title, LEFT).shift(0.2 * DOWN)
+
+        txt_cur = MathTex(
+            r"\text{current node } (u) = n_1,\ ",
+            font_size=eqn_font_size,
+        ).next_to(txt_ex, RIGHT)
+        box_cur = SurroundingRectangle(self.g[1])
+
+        txt_prev = MathTex(
+            r"\text{previous node } (x) = n_3",
+            font_size=eqn_font_size,
+        ).next_to(txt_cur, RIGHT)
+        box_prev = SurroundingRectangle(self.g[3])
+
+        prev_to_cur = CurvedArrow(
+            start_point=self.g[3].get_center(),
+            end_point=self.g[1].get_center(),
+            angle=-PI/4,
+            stroke_width=2,
+        )
+
+        self.play(FadeIn(txt_idea))
+        self.wait(6)
+
+        self.play(
+            AnimationGroup(
+                Write(txt_in),
+                Write(txt_out),
+                Write(txt_return),
+                run_time=4,
+                lag_ratio=1,
+            )
+        )
+        self.wait(2)
+
+        self.play(FadeIn(txt_ex))
+        self.wait(2)
+
+        self.play(AnimationGroup(FadeIn(txt_cur), Create(box_cur), run_time=1))
+        self.wait(3)
+
+        self.play(
+            AnimationGroup(
+                FadeIn(txt_prev),
+                ReplacementTransform(box_cur, box_prev),
+                run_time=1,
+            )
+        )
+        self.wait(5)
+
+        self.play(AnimationGroup(Uncreate(box_prev), Create(prev_to_cur)))
+        self.wait(4)
+
+        # Show example of second order edges
+        cur_to_n2 = Arrow(start=self.g[1].get_center(), end=self.g[2].get_center())
+        self.play(
+            AnimationGroup(
+                Create(box_in),
+                Create(cur_to_n2),
+                lag_ratio=2,
+                run_time=4,
+            )
+        )
+        self.wait(9)
+
+        cur_to_n0 = Arrow(start=self.g[1].get_center(), end=self.g[0].get_center(), color=YELLOW)
+        self.play(
+            AnimationGroup(
+                ReplacementTransform(box_in, box_out),
+                Create(cur_to_n0),
+                lag_ratio=2,
+                run_time=4,
+            )
+        )
+        self.wait(6)
+
+        cur_to_n3 = Arrow(start=self.g[1].get_center(), end=self.g[3].get_center(), color=RED)
+        self.play(
+            AnimationGroup(
+                ReplacementTransform(box_out, box_return),
+                Create(cur_to_n3),
+                lag_ratio=2,
+                run_time=4,
+            )
+        )
+        self.play(Uncreate(box_return))
+        self.wait(4)
+
+        # Dsiplay biased transition probability equation
+        txt_apply = MathTex(
+            r"\text{Apply bias factor }\alpha_{p,q}(x,v) ",
+            r"&=1 &\text{if } d_G(x,v) = 1\\",
+            r"&=1/q &\text{if } d_G(x,v) = 2\\",
+            r"&=1/p &\text{if } d_G(x,v) = 0",
+            font_size=eqn_font_size,
+        ).next_to(txt_ex, 1.8 * DOWN).align_to(txt_ex, LEFT)
+
+        self.play(FadeIn(txt_apply))
+        self.wait(5)
+
+        # Formula for 2nd order transition probability
+        eqn_tran_prob = MathTex(
+            r"\mathbb{P}(v | u, x) = "
+            r"\frac{\alpha_{p,q}(x,v)w(u,v)}"
+            r"{\sum_{v' \in \mathcal{N}(u)}\alpha_{p,q}(x,v')w(u, v')}",
+            font_size=1.3*eqn_font_size,
+        ).next_to(txt_apply, DOWN).align_to(txt_apply, LEFT).shift(0.5*DOWN)
+        self.play(Write(eqn_tran_prob))
+        self.wait(10)
+
+        # Take home: 2nd order random walk also depends on the previous node
+        self.play(Create(box_take_home))
+        self.wait(2)
 
 
 class RecordSingleRandomWalk(RandomWalk):
