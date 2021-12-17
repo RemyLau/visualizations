@@ -112,16 +112,27 @@ class RandomWalk(Scene):
 class TransitionProbability(RandomWalk):
     def construct(self):
         eqn_font_size = 32
-        eqn_pos = 2.4 * RIGHT + 2.5 * UP
+        eqn_pos = 2.4 * RIGHT + 2 * UP
 
         self.setup_scene_single()
         self.wait(1 if not TEST else 0.1)
 
         nodes_to_remove = [4, 5, 6, 7, 8, 9]
-        #self.play(self.g.animate.remove_vertices(*nodes_to_remove))
-        self.g.remove_vertices(*nodes_to_remove)
-        self.g.remove_edges((2, 3))
-        self.wait(5 if not TEST else 0.1)
+        edges_to_remove = [
+            (u, v) for u, v in self.g.edges
+            if u in nodes_to_remove or v in nodes_to_remove
+        ]
+        to_remove = [self.g[v] for v in nodes_to_remove] \
+            + [self.g.edges[e] for e in edges_to_remove]
+
+        self.play(
+            AnimationGroup(
+                *map(Uncreate, to_remove),
+                lag_ratio=0.2,
+                run_time=1,
+            )
+        )
+        self.wait(5)
 
         eqn1 = MathTex(
             r"\mathbb{P}(v \in \mathcal{N}(u) | u) = \frac1{|\mathcal{N}(u)|}",
@@ -129,7 +140,7 @@ class TransitionProbability(RandomWalk):
         ).shift(eqn_pos)
 
         eqn2 = MathTex(
-            r"\mathbb{P}(n_3 | n_1) = \mathbb{P}(n_2 | n_1) = \mathbb{P}(n_0 | n_1) = \frac13",
+            r"\Rightarrow \mathbb{P}(n_3 | n_1) = \mathbb{P}(n_2 | n_1) = \mathbb{P}(n_0 | n_1) = \frac13",
             font_size=eqn_font_size
         ).shift(eqn_pos + DOWN)
 
@@ -151,6 +162,16 @@ class TransitionProbability(RandomWalk):
 
         self.play(Write(txt3))
         self.play(FadeIn(eqn4, shift=DOWN))
+        self.wait(5 if not TEST else 0.1)
+
+        self.play(
+            AnimationGroup(
+                FadeOut(txt3, shift=DOWN),
+                FadeOut(eqn4, shift=DOWN),
+                lag_ratio=0.2,
+                run_time=0.4,
+            )
+        )
         self.wait(1)
 
 
