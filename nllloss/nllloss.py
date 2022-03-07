@@ -51,7 +51,7 @@ class BinaryCase(Scene):
         nlll_eqn = MathTex(r"y \log{\hat{y}} + (1 - y) \log{(1 - \hat{y})}")\
             .next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(3.1 * RIGHT + 0.1 * UP)
         mat_brace = Brace(mat, direction=DOWN)
-        mat_brace_text = Text("Prediction values", font_size=24).next_to(mat_brace, direction=DOWN)
+        mat_brace_text = Text("Log predicted probabilities", font_size=24).next_to(mat_brace, direction=DOWN)
 
         self.play(
             Transform(gg, mat),
@@ -159,7 +159,7 @@ class MultiCase(Scene):
         mat_annot3 = MathTex(r"\log\hat{y}^{(2)}").next_to(logm.get_columns()[2], direction=UP).scale(0.6).shift(0.2 * RIGHT + 0.1 * UP)
         nlll_eqn = MathTex(r"\log{\hat{y}^{(y_i)}}").next_to(logm.get_columns()[2], direction=UP).scale(0.6).shift(2.1 * RIGHT + 0.1 * UP)
         mat_brace = Brace(logm, direction=DOWN)
-        mat_brace_text = Text("Prediction values", font_size=24).next_to(mat_brace, direction=DOWN)
+        mat_brace_text = Text("Log predicted probabilities", font_size=24).next_to(mat_brace, direction=DOWN)
 
         self.play(
             Create(mat_annot1),
