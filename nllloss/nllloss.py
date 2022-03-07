@@ -46,15 +46,10 @@ class BinaryCase(Scene):
                 ),
             ),
         ).shift(LEFT)
-        mat_annot1 = MathTex(r"\log(\hat{y})")\
-            .next_to(mat.get_columns()[0], direction=UP)\
-            .scale(0.6).shift(0.1 * LEFT + 0.1 * UP)
-        mat_annot2 = MathTex(r"\log(1 - \hat{y})")\
-            .next_to(mat.get_columns()[1], direction=UP)\
-            .scale(0.6).shift(0.1 * RIGHT + 0.1 * UP)
+        mat_annot1 = MathTex(r"\log(\hat{y})").next_to(mat.get_columns()[0], direction=UP).scale(0.6).shift(0.1 * LEFT + 0.1 * UP)
+        mat_annot2 = MathTex(r"\log(1 - \hat{y})").next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(0.1 * RIGHT + 0.1 * UP)
         nlll_eqn = MathTex(r"y \log{\hat{y}} + (1 - y) \log{(1 - \hat{y})}")\
-            .next_to(mat.get_columns()[1], direction=UP)\
-            .scale(0.6).shift(3.1 * RIGHT + 0.1 * UP)
+            .next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(3.1 * RIGHT + 0.1 * UP)
         mat_brace = Brace(mat, direction=DOWN)
         mat_brace_text = Text("Prediction values", font_size=24).next_to(mat_brace, direction=DOWN)
 
@@ -115,8 +110,9 @@ class BinaryCase(Scene):
                 )
         self.play(FadeOut(arrows[i]))
 
+        # Summing up the log likelihoods
         brace = Brace(mat, direction=RIGHT).shift(RIGHT * 3)
-        nlll_text = MathTex(round(nlll_sum / len(nllls), 2)).next_to(brace, direction=RIGHT)
+        nlll_text = MathTex(round(nlll_sum, 2)).next_to(brace, direction=RIGHT)
         self.play(Write(brace), Write(nlll_text))
 
         self.wait(2)
