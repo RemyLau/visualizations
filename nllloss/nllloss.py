@@ -11,24 +11,24 @@ class BinaryCase(Scene):
         y = np.expand_dims(rng.random(5), 1)
         y_true = np.expand_dims(np.array([1, 0, 0, 1, 0], dtype=int), 1)
 
-        m = self.matrix(y.round(2)).shift(LEFT * 3)
+        m = self.matrix(y.round(2)).shift(RIGHT * 3)
         y_text = MathTex(r"\hat{y} =").next_to(m, direction=LEFT)
 
         g1 = Group(m, y_text)
         self.play(FadeIn(g1))
         self.wait(2)
 
-        m2 = self.matrix((1 - y).round(2)).shift(RIGHT * 3)
+        m2 = self.matrix((1 - y).round(2)).shift(LEFT * 2)
         y2_text = MathTex(r"(1 - \hat{y}) =").next_to(m2, direction=LEFT)
 
         g2 = Group(m2, y2_text)
         self.play(FadeIn(g2))
         self.wait(3)
 
-        logm = self.matrix(np.log(y).round(2)).shift(LEFT * 3)
+        logm = self.matrix(np.log(y).round(2)).shift(RIGHT * 3)
         logy_text = MathTex(r"\log{\hat{y}} =").next_to(logm, direction=LEFT)
 
-        logm2 = self.matrix(np.log(1 - y).round(2)).shift(RIGHT * 3)
+        logm2 = self.matrix(np.log(1 - y).round(2)).shift(LEFT * 2)
         logy2_text = MathTex(r"\log{(1 - \hat{y})} =").next_to(logm2, direction=LEFT)
 
         log_g1 = Group(logm, logy_text)
@@ -41,13 +41,13 @@ class BinaryCase(Scene):
         mat = self.matrix(
             np.hstack(
                 (
-                    np.log(y).round(2),
                     np.log(1 - y).round(2),
+                    np.log(y).round(2),
                 ),
             ),
         ).shift(LEFT)
-        mat_annot1 = MathTex(r"\log(\hat{y})").next_to(mat.get_columns()[0], direction=UP).scale(0.6).shift(0.1 * LEFT + 0.1 * UP)
-        mat_annot2 = MathTex(r"\log(1 - \hat{y})").next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(0.1 * RIGHT + 0.1 * UP)
+        mat_annot1 = MathTex(r"\log(1 - \hat{y})").next_to(mat.get_columns()[0], direction=UP).scale(0.6).shift(0.1 * LEFT + 0.1 * UP)
+        mat_annot2 = MathTex(r"\log(\hat{y})").next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(0.1 * RIGHT + 0.1 * UP)
         nlll_eqn = MathTex(r"y \log{\hat{y}} + (1 - y) \log{(1 - \hat{y})}")\
             .next_to(mat.get_columns()[1], direction=UP).scale(0.6).shift(3.1 * RIGHT + 0.1 * UP)
         mat_brace = Brace(mat, direction=DOWN)
@@ -78,7 +78,7 @@ class BinaryCase(Scene):
         nlll_sum = 0
         for i in range(5):
             l_entry = m_true.get_entries()[i]
-            r_entry = mat.get_columns()[1 - y_true[i, 0]][i]
+            r_entry = mat.get_columns()[y_true[i, 0]][i]
             arrows.append(
                 Arrow(
                     start=l_entry.get_center(),
